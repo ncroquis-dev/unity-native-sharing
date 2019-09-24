@@ -23,7 +23,10 @@ public static class NativeShare
     /// <param name="chooserText"></param>
     public static void Share(string body, string filePath = null, string url = null, string subject = "", string mimeType = "text/html", bool chooser = false, string chooserText = "Select sharing app")
     {
-        ShareMultiple(body, new string[] { filePath }, url, subject, mimeType, chooser, chooserText);
+        if (string.IsNullOrEmpty(filePath))
+            ShareMultiple(body, null, url, subject, mimeType, chooser, chooserText);
+        else
+            ShareMultiple(body, new string[] { filePath }, url, subject, mimeType, chooser, chooserText);
     }
 
     /// <summary>
@@ -39,7 +42,7 @@ public static class NativeShare
     public static void ShareMultiple(string body, string[] filePaths = null, string url = null, string subject = "", string mimeType = "text/html", bool chooser = false, string chooserText = "Select sharing app")
     {
 #if UNITY_ANDROID
-		ShareAndroid(body, subject, url, filePaths, mimeType, chooser, chooserText);
+        ShareAndroid(body, subject, url, filePaths, mimeType, chooser, chooserText);
 #elif UNITY_IOS
 		ShareIOS(body, subject, url, filePaths);
 #else
@@ -50,9 +53,12 @@ public static class NativeShare
     }
 
 #if UNITY_ANDROID
-	public static void ShareAndroid(string body, string subject, string url, string[] filePaths, string mimeType, bool chooser, string chooserText)
-	{
-		using (AndroidJavaClass intentClass = new AndroidJavaClass("android.content.Intent"))
+    public static void ShareAndroid(string body, string subject, string url, string[] filePaths, string mimeType, bool chooser, string chooserText)
+    {
+#if UNITY_EDITOR
+        Debug.LogFormat("NativeShare.ShareAndroid({0}, {1}, {2}, ..., {3}, {4})", body, subject, url, mimeType, chooserText);
+#else
+        using (AndroidJavaClass intentClass = new AndroidJavaClass("android.content.Intent"))
 		using (AndroidJavaObject intentObject = new AndroidJavaObject("android.content.Intent"))
 		{
 			using (intentObject.Call<AndroidJavaObject>("setAction", intentClass.GetStatic<string>("ACTION_SEND")))
@@ -107,7 +113,8 @@ public static class NativeShare
                 }
 			}
 		}
-	}
+#endif
+    }
 #endif
 
 #if UNITY_IOS
