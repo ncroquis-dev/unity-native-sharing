@@ -20,6 +20,7 @@ UnityVS/
 /*.user
 /*.unityproj
 /*.booproj
+.vs
  
 # ============ #
 # OS generated #
