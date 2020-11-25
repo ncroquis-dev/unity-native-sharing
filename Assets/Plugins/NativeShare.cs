@@ -84,17 +84,27 @@ public static class NativeShare
 				using (AndroidJavaClass uriClass = new AndroidJavaClass("android.net.Uri"))
 				using (AndroidJavaObject uris = new AndroidJavaObject("java.util.ArrayList"))
 				{
+					bool bAdded = false;
 					for (int i = 0; i < filePaths.Length; i++)
 					{
+						if (string.IsNullOrEmpty(filePaths[i]))
+							continue;
+
+						bAdded = true;
 						//instantiate the object Uri with the parse of the url's file
 						using (AndroidJavaObject uriObject = uriClass.CallStatic<AndroidJavaObject>("parse", "file://" + filePaths[i]))
 						{
-							uris.Call<bool>("add", uriObject);
+@ -87,8 +97,11 @@ public static class NativeShare
 						}
 					}
 
 					using (intentObject.Call<AndroidJavaObject>("putParcelableArrayListExtra", intentClass.GetStatic<string>("EXTRA_STREAM"), uris))
 					{ }
+					if (bAdded)
+					{
+						using (intentObject.Call<AndroidJavaObject>("putParcelableArrayListExtra", intentClass.GetStatic<string>("EXTRA_STREAM"), uris))
+						{ }
+					}
 				}
 			}
 
